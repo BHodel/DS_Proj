@@ -3,6 +3,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
+using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
@@ -52,17 +53,52 @@ public class Game_Manager : NetworkBehaviour {
         }
     }
 
-    async Task<string> setup_relay() {
+    async Task<string> create_relay() {
         try {
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(5);
-            string joincode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-            return joincode;
+            string join_code = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+
+            network_manager = Instantiate(network_manager);
+            var unity_transport = network_manager.GetComponent<UnityTransport>();
+            unity_transport.SetHostRelayData(
+                allocation.RelayServer.IpV4,
+                (ushort)allocation.RelayServer.Port,
+                allocation.AllocationIdBytes,
+                allocation.Key,
+                allocation.ConnectionData
+            );
+            network_manager.StartHost();
+
+            return join_code;
         }
         catch (RelayServiceException e) {
             Debug.LogError(e);
         }
         return "";
     }
+
+    async void join_relay(string join_code) {
+        try {
+            JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(join_code);
+            //var relayServerData = new RelayServerData(allocation, "dtls");
+
+            network_manager = Instantiate(network_manager);
+            var unity_transport = network_manager.GetComponent<UnityTransport>();
+            unity_transport.SetClientRelayData(
+                allocation.RelayServer.IpV4,
+                (ushort)allocation.RelayServer.Port,
+                allocation.AllocationIdBytes,
+                allocation.Key,
+                allocation.ConnectionData,
+                allocation.HostConnectionData
+            );
+            network_manager.StartClient();
+        }
+        catch (RelayServiceException e) {
+            Debug.LogError(e);
+        }
+    }
+
 
     // returns the game code
     // called from main menu
@@ -74,28 +110,26 @@ public class Game_Manager : NetworkBehaviour {
 
         string game_code = "";
         if (!is_singleplayer) {
-            game_code = await setup_relay();
+            game_code = await create_relay();
         }
         Debug.Log("Hosting Game (code=')" + game_code + "'");
 
-        network_manager = Instantiate(network_manager);
-        network_manager.StartHost();
         is_singleplayer = singleplayer;
 
         await SceneManager.LoadSceneAsync("Lobby");
         state = Local_Game_State.Lobby;
     }
 
-    public void join_game(string join_code) {
+    public async void join_game(string join_code) {
         if (state != Local_Game_State.Main_Menu) {
             Debug.LogError("Cannot Join Game in Current Game State" + state.ToString());
             return;
         }
-        network_manager = Instantiate(network_manager);
-        network_manager.StartClient();
-
-        state = Local_Game_State.Lobby;
         Debug.Log("Joining Game (code=')" + join_code + "'");
+        join_relay(join_code);
+
+        await SceneManager.LoadSceneAsync("Lobby");
+        state = Local_Game_State.Lobby;
     }
 
     void Update() {
