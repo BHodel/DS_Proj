@@ -1,0 +1,15 @@
+.menu-container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    gap: 10px;
+    padding: 20px;
+}
+
+Button, TextField {
+    font-size: 18px;
+    width: 250px;
+    height: 50px;
+}

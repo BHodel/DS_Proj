@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <Style src="Lobby.uss" />
+
+  <ui:VisualElement class="lobby-container">
+    <ui:Label name="lobbyTitle" text="Lobby" class="title" />
+    <ui:Label name="joinCodeLabel" text="Join Code: N/A" class="join-code" />
+    <ui:ScrollView name="playerList" class="player-list" />
+    <ui:Button name="startButton" text="Start Game" class="start-button" />
+  </ui:VisualElement>
+</ui:UXML>
+

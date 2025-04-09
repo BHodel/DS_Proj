@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <Style src="Main_Menu.uss" />
+    <ui:VisualElement name="root">
+        <ui:VisualElement name="main-menu" class="menu-container">
+            <ui:Button name="singleplayer-button" text="Singleplayer" />
+            <ui:Button name="multiplayer-button" text="Multiplayer" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="multiplayer-menu" class="menu-container" style="display: none;">
+            <ui:Button name="host-button" text="Host Game" />
+            <ui:Button name="join-button" text="Join Game" />
+            <ui:TextField name="join-code-field" label="Join Code" style="display: none;" />
+            <ui:Button name="join-submit-button" text="Join" style="display: none;" />
+            <ui:Button name="back-button" text="Back" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
